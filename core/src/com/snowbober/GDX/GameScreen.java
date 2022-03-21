@@ -14,12 +14,16 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.snowbober.OOP.ConstValues;
 import com.snowbober.OOP.Position;
 import com.snowbober.OOP.Visual;
-import com.snowbober.OOP.enitity.*;
+import com.snowbober.OOP.enitity.Background;
+import com.snowbober.OOP.enitity.CollisionInfo;
+import com.snowbober.OOP.enitity.Obstacle;
+import com.snowbober.OOP.enitity.Player;
 import com.snowbober.OOP.enitity.obstacles.Box;
 import com.snowbober.OOP.enitity.obstacles.Grid;
 import com.snowbober.OOP.enitity.obstacles.Rail;
 import com.snowbober.OOP.enitity.obstacles.ScorePoint;
 import com.snowbober.OOP.enums.CollisionType;
+import com.snowbober.OOP.interfaces.Movable;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -39,7 +43,7 @@ public class GameScreen implements Screen {
     private Background background2;
     private Player player;
     private Queue<Obstacle> obstacles;
-    private Queue<ScorePoint> scorePoints;
+    private List<ScorePoint> scorePoints;
 
     private long gameFrame;
     private int obstacleSpawnRate;
@@ -65,6 +69,8 @@ public class GameScreen implements Screen {
                 new Visual(playerTexture, ConstValues.BOBER_DEFAULT_WIDTH, ConstValues.BOBER_DEFAULT_HEIGHT));
     }
 
+    //todo:
+    // zeskok z raila, nieśmiertelność, stany gry, render wyniku
     @Override
     public void render(float delta) {
 
@@ -72,6 +78,12 @@ public class GameScreen implements Screen {
         move(gameFrame);
 
         generateObstacle();
+
+        if (!player.isImmortal()) {
+            detectCollisions();
+        } else {
+
+        }
 
         draw();
 
@@ -84,33 +96,21 @@ public class GameScreen implements Screen {
 
         batch.begin();
 
-        drawEntity(background1);
-        drawEntity(background2);
-        drawEntity(player);
+        background1.render(batch);
+        background2.render(batch);
 
         for (Obstacle obstacle : obstacles) {
-            drawEntity(obstacle);
+            obstacle.render(batch);
         }
 //        for (ScorePoint scorePoint : scorePoints) {
 //            drawEntity(scorePoint);
 //        }
 
-        batch.end();
-    }
+        player.render(batch);
 
-    private void drawEntity(EntityWithTexture entity) {
-        batch.draw(
-                entity.getVisual().getTexture(),
-                entity.getPosition().getX(),
-                entity.getPosition().getY(),
-                entity.getVisual().getImgWidth() / 2f,
-                entity.getVisual().getImgHeight() / 2f,
-                entity.getVisual().getImgWidth(),
-                entity.getVisual().getImgHeight(),
-                1,
-                1,
-                entity.getVisual().getRotation()
-        );
+
+
+        batch.end();
     }
 
     private void move(long gameFrame) {
@@ -128,32 +128,47 @@ public class GameScreen implements Screen {
         }
     }
 
-    private void moveEntity(MovableEntity entity, long gameFrame) {
+    private void moveEntity(Movable entity, long gameFrame) {
         entity.move(gameFrame);
     }
 
     private void detectCollisions() {
+        for (Obstacle obstacle : obstacles) {
+            CollisionType type = intersects(player, obstacle);
+            if (type != CollisionType.NONE) {
+                player.collide(obstacle);
+            }
+        }
 
-
+        for (ScorePoint point : scorePoints) {
+            CollisionType type = intersects(player, point);
+            if (type != CollisionType.NONE) {
+                player.collide(point);
+                scorePoints.remove(point);
+            }
+        }
     }
-//
-//    private CollisionType intersects(Player player, Obstacle obstacle) {
-//
-//        colA.rectangle.x = posA.x;
-//        colA.rectangle.y = posA.y;
-//
-//        colB.rectangle.x = posB.x;
-//        colB.rectangle.y = posB.y;
-//
-//        if (touch(colA.rectangle, colB.rectangle)) {
-//            return CollisionType.TOUCH;
-//        }
-//        if (colA.rectangle.overlaps(colB.rectangle)) {
-//            return CollisionType.INTERSECT;
-//        }
-//
-//        return CollisionType.NONE;
-//    }
+
+    private CollisionType intersects(Player player, Obstacle obstacle) {
+
+        CollisionInfo playerInfo = player.getCollisionInfo();
+        CollisionInfo obstacleInfo = obstacle.getCollisionInfo();
+
+        playerInfo.rectangle.x = player.getPosition().getX();
+        playerInfo.rectangle.y = player.getPosition().getY();
+
+        obstacleInfo.rectangle.x = obstacle.getPosition().getX();
+        obstacleInfo.rectangle.y = obstacle.getPosition().getY();
+
+        if (touch(playerInfo.rectangle, obstacleInfo.rectangle)) {
+            return CollisionType.TOUCH;
+        }
+        if (playerInfo.rectangle.overlaps(obstacleInfo.rectangle)) {
+            return CollisionType.INTERSECT;
+        }
+
+        return CollisionType.NONE;
+    }
 
     private boolean touch(Rectangle s, Rectangle r) {
         boolean left = s.x == r.x + r.width && s.x + s.width > r.x && s.y < r.y + r.height && s.y + s.height > r.y;
@@ -172,12 +187,10 @@ public class GameScreen implements Screen {
             if (x % 3 == 0) {
                 createBox();
                 createScorePoint(270);
-            }
-            else if (x % 4 == 0) {
+            } else if (x % 4 == 0) {
                 createGrid();
                 createScorePoint(500);
-            }
-            else {
+            } else {
                 createRail();
                 createScorePoint(500);
             }
