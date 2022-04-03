@@ -14,6 +14,7 @@ public abstract class Obstacle extends EntityWithTexture implements Movable, Col
 
     public Obstacle(Position position, Visual visual, int speed) {
         super(position, visual);
+        this.zIndex = 0;
         this.speed = speed;
         collisionInfo = new CollisionInfo(visual.getImgWidth(), visual.getImgHeight());
     }

@@ -27,6 +27,10 @@ public class Visual {
         return texture;
     }
 
+    public void setTexture(TextureRegion texture) {
+        this.texture = texture;
+    }
+
     public int getImgWidth() {
         return imgWidth;
     }

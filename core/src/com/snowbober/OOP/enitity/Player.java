@@ -35,6 +35,7 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
 
     public Player(Position position, Visual visual) {
         super(position, visual);
+        this.zIndex = 0;
         this.score = 0;
         this.lives = 3;
         this.playerState = PlayerState.IDLE;
@@ -43,6 +44,7 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
 
     public Player(Position position, Visual visual, int score, int lives, PlayerState playerState) {
         super(position, visual);
+        this.zIndex = 1;
         this.score = score;
         this.lives = lives;
         this.playerState = playerState;
@@ -57,24 +59,34 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
         this.immortal = immortal;
     }
 
+    public void setPlayerState(PlayerState playerState) {
+        this.playerState = playerState;
+    }
+
+    public PlayerState getPlayerState() {
+        return playerState;
+    }
+
     @Override
     public void jump(long gameFrame) {
+        Texture texture;
         if (playerState == PlayerState.SLIDING) {
             playerState = PlayerState.JUMPING_ON_RAIL;
             jumpFrom = ConstValues.JUMP_FROM_RAIL_Y;
             startJumpFrame = gameFrame;
-            Texture texture = new Texture("bober-jump.png");
+            texture = new Texture("bober-flip.png");
             this.setVisual(new Visual(texture, ConstValues.BOBER_IN_JUMP_WIDTH, ConstValues.BOBER_IN_JUMP_HEIGHT));
         } else if (playerState != PlayerState.JUMPING && playerState != PlayerState.JUMPING_ON_RAIL
                 && playerState != PlayerState.JUMPING_FROM_CROUCH) {
             if (playerState == PlayerState.CROUCH) {
+                texture = new Texture("bober-flip.png");
                 playerState = PlayerState.JUMPING_FROM_CROUCH;
             } else {
+                texture = new Texture("bober-jump.png");
                 playerState = PlayerState.JUMPING;
             }
             jumpFrom = ConstValues.JUMP_FROM_GROUND_Y;
             startJumpFrame = gameFrame;
-            Texture texture = new Texture("bober-jump.png");
             this.setVisual(new Visual(texture, ConstValues.BOBER_IN_JUMP_WIDTH, ConstValues.BOBER_IN_JUMP_HEIGHT));
         }
     }
@@ -85,8 +97,8 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
             playerState = PlayerState.CROUCH;
 
             position.setY(100);
-            Texture texture = new Texture("bober-jump.png");
-            this.setVisual(new Visual(texture, ConstValues.BOBER_IN_JUMP_WIDTH, ConstValues.BOBER_IN_JUMP_HEIGHT));
+            Texture texture = new Texture("bober-luzny.png");
+            this.setVisual(new Visual(texture, ConstValues.BOBER_CROUCH_WIDTH, ConstValues.BOBER_CROUCH_HEIGHT));
         } else if (playerState == PlayerState.CROUCH) {
             playerState = PlayerState.IDLE;
 

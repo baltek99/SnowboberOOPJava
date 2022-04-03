@@ -7,6 +7,7 @@ import com.snowbober.OOP.interfaces.Renderable;
 
 public abstract class EntityWithTexture extends Entity implements Renderable {
     private Visual visual;
+    protected int zIndex = 0;
 
     public EntityWithTexture(Position position, Visual visual) {
         super(position);
@@ -19,6 +20,10 @@ public abstract class EntityWithTexture extends Entity implements Renderable {
 
     public void setVisual(Visual visual) {
         this.visual = visual;
+    }
+
+    public int getZIndex() {
+        return zIndex;
     }
 
     @Override

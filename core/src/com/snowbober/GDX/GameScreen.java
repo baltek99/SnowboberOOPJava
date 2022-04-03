@@ -18,11 +18,9 @@ import com.snowbober.OOP.enitity.Background;
 import com.snowbober.OOP.enitity.CollisionInfo;
 import com.snowbober.OOP.enitity.Obstacle;
 import com.snowbober.OOP.enitity.Player;
-import com.snowbober.OOP.enitity.obstacles.Box;
-import com.snowbober.OOP.enitity.obstacles.Grid;
-import com.snowbober.OOP.enitity.obstacles.Rail;
-import com.snowbober.OOP.enitity.obstacles.ScorePoint;
+import com.snowbober.OOP.enitity.obstacles.*;
 import com.snowbober.OOP.enums.CollisionType;
+import com.snowbober.OOP.enums.PlayerState;
 import com.snowbober.OOP.interfaces.Movable;
 
 import java.util.LinkedList;
@@ -39,11 +37,10 @@ public class GameScreen implements Screen {
     private final Viewport viewport;
     private final SpriteBatch batch;
 
-    private Background background1;
-    private Background background2;
     private Player player;
     private Queue<Obstacle> obstacles;
     private List<ScorePoint> scorePoints;
+    private List<Background> backgrounds;
 
     private long gameFrame;
     private int obstacleSpawnRate;
@@ -53,27 +50,37 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         viewport = new FitViewport(SnowBoberGame.V_WIDTH, SnowBoberGame.V_HEIGHT, camera);
 
-        createWorld();
         gameFrame = 0;
         obstacleSpawnRate = 300;
         obstacles = new LinkedList<>();
         scorePoints = new LinkedList<>();
+        backgrounds = new LinkedList<>();
+//        createWorld();
+        createStart();
+    }
+
+    private void createStart() {
+        Texture backgroundTexture = new Texture("start.jpg");
+        Background background = new Background(new Position(0, 0), new Visual(backgroundTexture, SnowBoberGame.V_WIDTH, SnowBoberGame.V_HEIGHT), 0);
+        backgrounds.add(background);
+        player = null;
     }
 
     private void createWorld() {
         Texture backgroundTexture = new Texture("background.jpg");
         Texture playerTexture = new Texture("bober-stand.png");
-        background1 = new Background(new Position(0, 0), new Visual(backgroundTexture, SnowBoberGame.V_WIDTH, SnowBoberGame.V_HEIGHT), -2);
-        background2 = new Background(new Position(V_WIDTH, 0), new Visual(backgroundTexture, SnowBoberGame.V_WIDTH, SnowBoberGame.V_HEIGHT), -2);
+        Background background1 = new Background(new Position(0, 0), new Visual(backgroundTexture, SnowBoberGame.V_WIDTH, SnowBoberGame.V_HEIGHT), -2);
+        Background background2 = new Background(new Position(V_WIDTH, 0), new Visual(backgroundTexture, SnowBoberGame.V_WIDTH, SnowBoberGame.V_HEIGHT), -2);
+        backgrounds.add(background1);
+        backgrounds.add(background2);
         player = new Player(new Position(ConstValues.BOBER_DEFAULT_POSITION_X, ConstValues.BOBER_DEFAULT_POSITION_Y),
                 new Visual(playerTexture, ConstValues.BOBER_DEFAULT_WIDTH, ConstValues.BOBER_DEFAULT_HEIGHT));
     }
 
     //todo:
-    // zeskok z raila, nieśmiertelność, stany gry, render wyniku
+    // nieśmiertelność, stany gry, render wyniku, grid, podmiana tekstur, skoki
     @Override
     public void render(float delta) {
-
         detectInput(gameFrame);
         move(gameFrame);
 
@@ -86,6 +93,7 @@ public class GameScreen implements Screen {
         }
 
         draw();
+        clearObstacles();
 
         gameFrame++;
     }
@@ -96,33 +104,44 @@ public class GameScreen implements Screen {
 
         batch.begin();
 
-        background1.render(batch);
-        background2.render(batch);
+        for (Background background : backgrounds) {
+            background.render(batch);
+        }
 
         for (Obstacle obstacle : obstacles) {
-            obstacle.render(batch);
+            if (obstacle.getZIndex() == 0) {
+                obstacle.render(batch);
+            }
         }
-//        for (ScorePoint scorePoint : scorePoints) {
-//            drawEntity(scorePoint);
-//        }
 
-        player.render(batch);
+        if (player != null) {
+            player.render(batch);
+        }
 
-
+        for (Obstacle obstacle : obstacles) {
+            if (obstacle.getZIndex() == 1) {
+                obstacle.render(batch);
+            }
+        }
 
         batch.end();
     }
 
     private void move(long gameFrame) {
-        background1.fixPosition();
-        background2.fixPosition();
-        moveEntity(background1, gameFrame);
-        moveEntity(background2, gameFrame);
-        moveEntity(player, gameFrame);
+        for (Background background : backgrounds) {
+            background.fixPosition();
+            moveEntity(background, gameFrame);
+        }
+
+        if (player != null) {
+            moveEntity(player, gameFrame);
+        }
 
         for (Obstacle obstacle : obstacles) {
+//            System.out.println("Obstacle position " + obstacle.getPosition().getX());
             obstacle.move(gameFrame);
         }
+
         for (ScorePoint scorePoint : scorePoints) {
             scorePoint.move(gameFrame);
         }
@@ -136,7 +155,14 @@ public class GameScreen implements Screen {
         for (Obstacle obstacle : obstacles) {
             CollisionType type = intersects(player, obstacle);
             if (type != CollisionType.NONE) {
-                player.collide(obstacle);
+                boolean collisionFlag = true;
+                try {
+                    Rail rail = (Rail) obstacle;
+                    collisionFlag = getOffRail(rail);
+                } catch (Exception e) {
+//                    e.printStackTrace();
+                }
+                if (collisionFlag) player.collide(obstacle);
             }
         }
 
@@ -179,15 +205,31 @@ public class GameScreen implements Screen {
         return left || right || down || up;
     }
 
+    private boolean getOffRail(Rail rail) {
+        int obstacleX = rail.getPosition().getX();
+        int playerX = player.getPosition().getX();
+        if (obstacleX < playerX && Math.abs(playerX - obstacleX) >= ConstValues.RAIL_AND_BOBER_DIFFERENCE) {
+            if (player.getPlayerState() == PlayerState.SLIDING) {
+                player.setPlayerState(PlayerState.IDLE);
+                player.getPosition().setY(ConstValues.IDLE_RIDE_Y);
+                Texture texture = new Texture("bober-stand.png");
+                player.setVisual(new Visual(texture, ConstValues.BOBER_DEFAULT_WIDTH, ConstValues.BOBER_DEFAULT_HEIGHT));
+            }
+            player.getCollisionInfo().collisionType = CollisionType.NONE;
+            return false;
+        }
+        return true;
+    }
+
     private void generateObstacle() {
         if (gameFrame % obstacleSpawnRate == 0) {
             Random random = new Random();
-            int x = random.nextInt();
+            int x = random.nextInt(1000);
 
-            if (x % 3 == 0) {
+            if (x < 333) {
                 createBox();
                 createScorePoint(270);
-            } else if (x % 4 == 0) {
+            } else if (x < 666) {
                 createGrid();
                 createScorePoint(500);
             } else {
@@ -198,8 +240,11 @@ public class GameScreen implements Screen {
     }
 
     private void createGrid() {
-        Grid grid = new Grid(new Position(V_WIDTH, 110), -3);
+        Grid grid = new Grid(new Position(V_WIDTH, 60), -3);
+//        grids.add(grid);
+        GridStick gridStick = new GridStick(new Position(V_WIDTH, 60), -3);
         obstacles.add(grid);
+        obstacles.add(gridStick);
     }
 
     private void createRail() {
@@ -222,6 +267,12 @@ public class GameScreen implements Screen {
             player.jump(gameFrame);
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_LEFT)) {
             player.crouch();
+        }
+    }
+
+    private void clearObstacles() {
+        if (obstacles.peek() != null && obstacles.peek().getPosition().getX() < -500) {
+            obstacles.poll();
         }
     }
 

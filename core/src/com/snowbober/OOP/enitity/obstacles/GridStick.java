@@ -9,12 +9,11 @@ import com.snowbober.OOP.enitity.Obstacle;
 import com.snowbober.OOP.enums.ObstacleType;
 import com.snowbober.OOP.interfaces.Collidable;
 
-public class Rail extends Obstacle {
-
-    public Rail(Position position, int speed) {
-        super(position, new Visual(new Texture("rail.png"), ConstValues.RAIL_WIDTH, ConstValues.RAIL_HEIGHT), speed);
-        obstacleType = ObstacleType.RAIL;
-        collisionInfo = new CollisionInfo(ConstValues.RAIL_WIDTH - 35, ConstValues.RAIL_HEIGHT);
+public class GridStick extends Obstacle {
+    public GridStick(Position position, int speed) {
+        super(position, new Visual(new Texture("grid-stick.png"), ConstValues.GRID_WIDTH, ConstValues.GRID_HEIGHT), speed);
+        obstacleType = ObstacleType.GRID;
+        collisionInfo = new CollisionInfo(0, 0);
     }
 
     @Override
