@@ -12,10 +12,14 @@ import com.snowbober.OOP.interfaces.Movable;
 import com.snowbober.OOP.interfaces.PlayerActions;
 import com.snowbober.Util.Util;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 public class Player extends EntityWithTexture implements PlayerActions, Movable, Collidable {
 
     private int score;
-    private int lives;
+    private Queue<Life> lives;
     private boolean immortal = false;
     private PlayerState playerState;
     private CollisionInfo collisionInfo;
@@ -37,20 +41,14 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
         super(position, visual);
         this.zIndex = 0;
         this.score = 0;
-        this.lives = 3;
+        this.lives = new LinkedList<>();
+        lives.add(new Life(new Position(ConstValues.HEART_POSITION_X_1, ConstValues.HEART_POSITION_Y)));
+        lives.add(new Life(new Position(ConstValues.HEART_POSITION_X_2, ConstValues.HEART_POSITION_Y)));
+        lives.add(new Life(new Position(ConstValues.HEART_POSITION_X_3, ConstValues.HEART_POSITION_Y)));
         this.playerState = PlayerState.IDLE;
         collisionInfo = new CollisionInfo(visual.getImgWidth(), visual.getImgHeight());
     }
-
-    public Player(Position position, Visual visual, int score, int lives, PlayerState playerState) {
-        super(position, visual);
-        this.zIndex = 1;
-        this.score = score;
-        this.lives = lives;
-        this.playerState = playerState;
-        collisionInfo = new CollisionInfo(visual.getImgWidth(), visual.getImgHeight());
-    }
-
+    
     public boolean isImmortal() {
         return immortal;
     }
@@ -65,6 +63,18 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
 
     public PlayerState getPlayerState() {
         return playerState;
+    }
+
+    public Queue<Life> getLives() {
+        return lives;
+    }
+    
+    public int getNumberOfLives() {
+        return lives.size();
+    }
+
+    public int getScore() {
+        return score;
     }
 
     @Override
@@ -147,9 +157,8 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
             System.out.println("Punkt");
             score++;
         } else if (obstacle.obstacleType == ObstacleType.BOX || (obstacle.obstacleType == ObstacleType.RAIL && playerState == PlayerState.IDLE)) {
-            lives--;
+            lives.poll();
             immortal = true;
-            System.out.println("tracisz zycie");
         } else if (obstacle.obstacleType == ObstacleType.RAIL && (playerState == PlayerState.JUMPING || playerState == PlayerState.JUMPING_FROM_CROUCH)) {
             this.getPosition().setY(ConstValues.SLIDING_ON_RAIL_Y);
             playerState = PlayerState.SLIDING;
@@ -157,9 +166,8 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
             this.setVisual(new Visual(texture, ConstValues.BOBER_ON_RAIL_WIDTH, ConstValues.BOBER_ON_RAIL_HEIGHT));
             System.out.println("rail");
         } else if (obstacle.obstacleType == ObstacleType.GRID && playerState != PlayerState.CROUCH) {
-            lives--;
+            lives.poll();
             immortal = true;
-            System.out.println("tracisz zycie");
         }
     }
 

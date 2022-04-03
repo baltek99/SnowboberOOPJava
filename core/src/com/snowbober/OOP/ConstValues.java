@@ -34,4 +34,11 @@ public class ConstValues {
     public static final int GRID_HEIGHT = 280;
     public static final int SCORE_WIDTH = 1;
     public static final int SCORE_HEIGHT = V_HEIGHT;
+    public static final int HEART_WIDTH = 50;
+    public static final int HEART_HEIGHT = 50;
+
+    public static final int HEART_POSITION_Y = 450;
+    public static final int HEART_POSITION_X_1 = V_WIDTH - 250;
+    public static final int HEART_POSITION_X_2 = V_WIDTH - 180;
+    public static final int HEART_POSITION_X_3 = V_WIDTH - 110;
 }

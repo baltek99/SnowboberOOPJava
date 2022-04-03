@@ -14,12 +14,10 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.snowbober.OOP.ConstValues;
 import com.snowbober.OOP.Position;
 import com.snowbober.OOP.Visual;
-import com.snowbober.OOP.enitity.Background;
-import com.snowbober.OOP.enitity.CollisionInfo;
-import com.snowbober.OOP.enitity.Obstacle;
-import com.snowbober.OOP.enitity.Player;
+import com.snowbober.OOP.enitity.*;
 import com.snowbober.OOP.enitity.obstacles.*;
 import com.snowbober.OOP.enums.CollisionType;
+import com.snowbober.OOP.enums.GameState;
 import com.snowbober.OOP.enums.PlayerState;
 import com.snowbober.OOP.interfaces.Movable;
 
@@ -37,6 +35,8 @@ public class GameScreen implements Screen {
     private final Viewport viewport;
     private final SpriteBatch batch;
 
+    private GameState gameState;
+
     private Player player;
     private Queue<Obstacle> obstacles;
     private List<ScorePoint> scorePoints;
@@ -52,21 +52,21 @@ public class GameScreen implements Screen {
 
         gameFrame = 0;
         obstacleSpawnRate = 300;
-        obstacles = new LinkedList<>();
-        scorePoints = new LinkedList<>();
-        backgrounds = new LinkedList<>();
+
 //        createWorld();
+        gameState = GameState.MAIN_MENU;
         createStart();
     }
 
     private void createStart() {
+        resetWorld();
         Texture backgroundTexture = new Texture("start.jpg");
         Background background = new Background(new Position(0, 0), new Visual(backgroundTexture, SnowBoberGame.V_WIDTH, SnowBoberGame.V_HEIGHT), 0);
         backgrounds.add(background);
-        player = null;
     }
 
-    private void createWorld() {
+    private void createGameWorld() {
+        resetWorld();
         Texture backgroundTexture = new Texture("background.jpg");
         Texture playerTexture = new Texture("bober-stand.png");
         Background background1 = new Background(new Position(0, 0), new Visual(backgroundTexture, SnowBoberGame.V_WIDTH, SnowBoberGame.V_HEIGHT), -2);
@@ -77,24 +77,53 @@ public class GameScreen implements Screen {
                 new Visual(playerTexture, ConstValues.BOBER_DEFAULT_WIDTH, ConstValues.BOBER_DEFAULT_HEIGHT));
     }
 
+    private void createGameOver(int score) {
+        resetWorld();
+        Texture backgroundTexture = new Texture("game-over.jpg");
+        Background background = new Background(new Position(0, 0), new Visual(backgroundTexture, SnowBoberGame.V_WIDTH, SnowBoberGame.V_HEIGHT), 0);
+        backgrounds.add(background);
+    }
+
+    private void resetWorld() {
+        player = null;
+        obstacles = new LinkedList<>();
+        scorePoints = new LinkedList<>();
+        backgrounds = new LinkedList<>();
+    }
+
     //todo:
     // nieśmiertelność, stany gry, render wyniku, grid, podmiana tekstur, skoki
     @Override
     public void render(float delta) {
-        detectInput(gameFrame);
-        move(gameFrame);
+        if (gameState == GameState.MAIN_MENU) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
+                gameState = GameState.GAMEPLAY;
+                createGameWorld();
+            }
+        } else if (gameState == GameState.GAMEPLAY) {
+            detectInput(gameFrame);
+            move(gameFrame);
 
-        generateObstacle();
+            generateObstacle();
 
-        if (!player.isImmortal()) {
-            detectCollisions();
-        } else {
+            if (!player.isImmortal()) {
+                detectCollisions();
+            }
 
+            clearObstacles();
+
+            if (player.getLives().size() == 0) {
+                gameState = GameState.GAME_OVER;
+                createGameOver(player.getScore());
+            }
+        } else if (gameState == GameState.GAME_OVER) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
+                gameState = GameState.MAIN_MENU;
+                createStart();
+            }
         }
 
         draw();
-        clearObstacles();
-
         gameFrame++;
     }
 
@@ -116,6 +145,9 @@ public class GameScreen implements Screen {
 
         if (player != null) {
             player.render(batch);
+            for (Life life : player.getLives()) {
+                life.render(batch);
+            }
         }
 
         for (Obstacle obstacle : obstacles) {
