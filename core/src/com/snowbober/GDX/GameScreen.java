@@ -22,10 +22,7 @@ import com.snowbober.OOP.enums.PlayerState;
 import com.snowbober.OOP.interfaces.Movable;
 import com.sun.org.apache.bcel.internal.Const;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Random;
+import java.util.*;
 
 public class GameScreen implements Screen {
 
@@ -34,7 +31,7 @@ public class GameScreen implements Screen {
 
     private final Camera camera;
     private final Viewport viewport;
-    private final SpriteBatch batch;
+    private SpriteBatch batch;
     private final BitmapFont font;
 
     private GameState gameState;
@@ -65,6 +62,10 @@ public class GameScreen implements Screen {
         obstacleFrame = 0;
         obstacleSpawnRate = 300;
         currentObstacleSpeed = -3;
+
+        obstacles = new LinkedList<>();
+        scorePoints = new LinkedList<>();
+        backgrounds = new LinkedList<>();
 
 //        createWorld();
         gameState = GameState.MAIN_MENU;
@@ -103,9 +104,21 @@ public class GameScreen implements Screen {
         obstacleSpawnRate = 300;
         currentObstacleSpeed = -3;
         player = null;
+        disposeTextures(obstacles);
         obstacles = new LinkedList<>();
+        disposeTextures(scorePoints);
         scorePoints = new LinkedList<>();
+        disposeTextures(backgrounds);
         backgrounds = new LinkedList<>();
+        batch.dispose();
+        batch = new SpriteBatch();
+        batch.setProjectionMatrix(camera.combined);
+    }
+
+    private void disposeTextures(Collection collection) {
+        for (Object entity : collection) {
+            ((EntityWithTexture) entity).getVisual().getTexture().getTexture().dispose();
+        }
     }
 
     @Override
@@ -334,7 +347,8 @@ public class GameScreen implements Screen {
 
     private void clearObstacles() {
         if (obstacles.peek() != null && obstacles.peek().getPosition().getX() < -500) {
-            obstacles.poll();
+            Obstacle poll = obstacles.poll();
+            poll.getVisual().getTexture().getTexture().dispose();
         }
     }
 
