@@ -78,6 +78,20 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
         return score;
     }
 
+    public void moveRight() {
+        if (playerState == PlayerState.IDLE) {
+            position.setX(position.getX() + 5);
+            if (position.getX() > ConstValues.BOBER_MAX_X) position.setX(ConstValues.BOBER_MAX_X);
+        }
+    }
+
+    public void moveLeft() {
+        if (playerState == PlayerState.IDLE) {
+            position.setX(position.getX() - 5);
+            if (position.getX() < ConstValues.BOBER_MIN_X) position.setX(ConstValues.BOBER_MIN_X);
+        }
+    }
+
     @Override
     public void jump(long gameFrame) {
         Texture texture;
@@ -188,7 +202,7 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
             playerState = PlayerState.SLIDING;
             Texture texture = new Texture("bober-rail.png");
             this.setVisual(new Visual(texture, ConstValues.BOBER_ON_RAIL_WIDTH, ConstValues.BOBER_ON_RAIL_HEIGHT));
-            ((Rail) obstacle).setRailCollisionHeight(0);
+            ((Rail) obstacle).setRailCollisionHeight(1);
 //            System.out.println("rail");
         } else if (obstacle.obstacleType == ObstacleType.GRID && playerState != PlayerState.CROUCH) {
             lives.poll();

@@ -325,6 +325,10 @@ public class GameScreen implements Screen {
             player.jump(gameFrame);
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.CONTROL_LEFT)) {
             player.crouch();
+        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            player.moveRight();
+        } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            player.moveLeft();
         }
     }
 
