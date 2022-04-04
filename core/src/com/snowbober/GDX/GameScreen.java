@@ -3,11 +3,10 @@ package com.snowbober.GDX;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -20,6 +19,7 @@ import com.snowbober.OOP.enums.CollisionType;
 import com.snowbober.OOP.enums.GameState;
 import com.snowbober.OOP.enums.PlayerState;
 import com.snowbober.OOP.interfaces.Movable;
+import com.sun.org.apache.bcel.internal.Const;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -34,6 +34,7 @@ public class GameScreen implements Screen {
     private final Camera camera;
     private final Viewport viewport;
     private final SpriteBatch batch;
+    private final BitmapFont font;
 
     private GameState gameState;
 
@@ -49,6 +50,13 @@ public class GameScreen implements Screen {
         this.batch = new SpriteBatch();
         camera = new OrthographicCamera();
         viewport = new FitViewport(SnowBoberGame.V_WIDTH, SnowBoberGame.V_HEIGHT, camera);
+
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("cour.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 30;
+        font = generator.generateFont(parameter);
+        generator.dispose();
+        font.setColor(Color.BLACK);
 
         gameFrame = 0;
         obstacleSpawnRate = 300;
@@ -92,7 +100,7 @@ public class GameScreen implements Screen {
     }
 
     //todo:
-    // nieśmiertelność, stany gry, render wyniku, grid, podmiana tekstur, skoki
+    // nieśmiertelność, stany gry, skoki, przyśpieszanie gry
     @Override
     public void render(float delta) {
         if (gameState == GameState.MAIN_MENU) {
@@ -145,6 +153,7 @@ public class GameScreen implements Screen {
 
         if (player != null) {
             player.render(batch);
+            font.draw(batch, "Score: " + player.getScore(), ConstValues.SCORE_POSITION_X, ConstValues.SCORE_POSITION_Y);
             for (Life life : player.getLives()) {
                 life.render(batch);
             }

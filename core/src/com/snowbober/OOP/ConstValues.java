@@ -41,4 +41,7 @@ public class ConstValues {
     public static final int HEART_POSITION_X_1 = V_WIDTH - 250;
     public static final int HEART_POSITION_X_2 = V_WIDTH - 180;
     public static final int HEART_POSITION_X_3 = V_WIDTH - 110;
+
+    public static final int SCORE_POSITION_X = V_WIDTH - 200;
+    public static final int SCORE_POSITION_Y = 50;
 }
