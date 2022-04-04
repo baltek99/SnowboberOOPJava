@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.snowbober.OOP.ConstValues;
 import com.snowbober.OOP.Position;
 import com.snowbober.OOP.Visual;
+import com.snowbober.OOP.enitity.obstacles.Rail;
 import com.snowbober.OOP.enums.ObstacleType;
 import com.snowbober.OOP.enums.PlayerState;
 import com.snowbober.OOP.interfaces.Collidable;
@@ -13,7 +14,6 @@ import com.snowbober.OOP.interfaces.PlayerActions;
 import com.snowbober.Util.Util;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 public class Player extends EntityWithTexture implements PlayerActions, Movable, Collidable {
@@ -32,6 +32,7 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
     private float ollieDownRotationSpeed = 0.5f;
     private final int initialImmortalDurationVal = 150;
     private int immortalDuration = 150;
+    private int speedCount = 5;
 
     public CollisionInfo getCollisionInfo() {
         return collisionInfo;
@@ -48,7 +49,7 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
         this.playerState = PlayerState.IDLE;
         collisionInfo = new CollisionInfo(visual.getImgWidth(), visual.getImgHeight());
     }
-    
+
     public boolean isImmortal() {
         return immortal;
     }
@@ -68,7 +69,7 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
     public Queue<Life> getLives() {
         return lives;
     }
-    
+
     public int getNumberOfLives() {
         return lives.size();
     }
@@ -122,7 +123,7 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
     public void move(long gameFrame) {
         if (playerState == PlayerState.JUMPING || playerState == PlayerState.JUMPING_ON_RAIL
                 || playerState == PlayerState.JUMPING_FROM_CROUCH) {
-            if (gameFrame == startJumpFrame + jumpDuration) {
+            if (gameFrame >= startJumpFrame + jumpDuration) {
                 playerState = PlayerState.IDLE;
                 position.setY(ConstValues.IDLE_RIDE_Y);
                 this.getVisual().setRotation(0);
@@ -151,20 +152,44 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
     }
 
     @Override
+    public void speedUp(long gameFrame) {
+        if (gameFrame == ConstValues.NUMBER_OF_FRAMES_TO_INCREMENT) {
+            jumpHeight = 110;
+            jumpDuration = 80;
+            flipRotationSpeed = 4.5f;
+        } else if (gameFrame == 3 * ConstValues.NUMBER_OF_FRAMES_TO_INCREMENT) {
+//            jumpHeight = 110;
+            jumpDuration = 65;
+            flipRotationSpeed = 5.5f;
+        } else if (gameFrame == 6 * ConstValues.NUMBER_OF_FRAMES_TO_INCREMENT) {
+//            jumpHeight = 110;
+            jumpDuration = 55;
+            flipRotationSpeed = 6f;
+        } else if (gameFrame == 8 * ConstValues.NUMBER_OF_FRAMES_TO_INCREMENT) {
+//            jumpHeight = 110;
+            jumpDuration = jumpDuration - jumpDuration / speedCount;
+            flipRotationSpeed = flipRotationSpeed + flipRotationSpeed / speedCount;
+            speedCount++;
+        }
+    }
+
+    @Override
     public void collide(Collidable collidable) {
         Obstacle obstacle = (Obstacle) collidable;
         if (obstacle.obstacleType == ObstacleType.SCORE_POINT) {
-            System.out.println("Punkt");
+//            System.out.println("Punkt");
             score++;
         } else if (obstacle.obstacleType == ObstacleType.BOX || (obstacle.obstacleType == ObstacleType.RAIL && playerState == PlayerState.IDLE)) {
             lives.poll();
             immortal = true;
-        } else if (obstacle.obstacleType == ObstacleType.RAIL && (playerState == PlayerState.JUMPING || playerState == PlayerState.JUMPING_FROM_CROUCH)) {
+        } else if (obstacle.obstacleType == ObstacleType.RAIL && (playerState == PlayerState.JUMPING ||
+                playerState == PlayerState.JUMPING_FROM_CROUCH || playerState == PlayerState.JUMPING_ON_RAIL)) {
             this.getPosition().setY(ConstValues.SLIDING_ON_RAIL_Y);
             playerState = PlayerState.SLIDING;
             Texture texture = new Texture("bober-rail.png");
             this.setVisual(new Visual(texture, ConstValues.BOBER_ON_RAIL_WIDTH, ConstValues.BOBER_ON_RAIL_HEIGHT));
-            System.out.println("rail");
+            ((Rail) obstacle).setRailCollisionHeight(0);
+//            System.out.println("rail");
         } else if (obstacle.obstacleType == ObstacleType.GRID && playerState != PlayerState.CROUCH) {
             lives.poll();
             immortal = true;

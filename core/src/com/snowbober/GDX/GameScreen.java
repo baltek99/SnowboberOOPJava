@@ -17,6 +17,7 @@ import com.snowbober.OOP.enitity.*;
 import com.snowbober.OOP.enitity.obstacles.*;
 import com.snowbober.OOP.enums.CollisionType;
 import com.snowbober.OOP.enums.GameState;
+import com.snowbober.OOP.enums.ObstacleType;
 import com.snowbober.OOP.enums.PlayerState;
 import com.snowbober.OOP.interfaces.Movable;
 import com.sun.org.apache.bcel.internal.Const;
@@ -44,7 +45,9 @@ public class GameScreen implements Screen {
     private List<Background> backgrounds;
 
     private long gameFrame;
+    private int obstacleFrame;
     private int obstacleSpawnRate;
+    private int currentObstacleSpeed;
 
     public GameScreen() {
         this.batch = new SpriteBatch();
@@ -59,7 +62,9 @@ public class GameScreen implements Screen {
         font.setColor(Color.BLACK);
 
         gameFrame = 0;
+        obstacleFrame = 0;
         obstacleSpawnRate = 300;
+        currentObstacleSpeed = -3;
 
 //        createWorld();
         gameState = GameState.MAIN_MENU;
@@ -93,14 +98,16 @@ public class GameScreen implements Screen {
     }
 
     private void resetWorld() {
+        gameFrame = 0;
+        obstacleFrame = 0;
+        obstacleSpawnRate = 300;
+        currentObstacleSpeed = -3;
         player = null;
         obstacles = new LinkedList<>();
         scorePoints = new LinkedList<>();
         backgrounds = new LinkedList<>();
     }
 
-    //todo:
-    // nieśmiertelność, stany gry, skoki, przyśpieszanie gry
     @Override
     public void render(float delta) {
         if (gameState == GameState.MAIN_MENU) {
@@ -179,17 +186,21 @@ public class GameScreen implements Screen {
         }
 
         for (Obstacle obstacle : obstacles) {
-//            System.out.println("Obstacle position " + obstacle.getPosition().getX());
-            obstacle.move(gameFrame);
+            moveEntity(obstacle, gameFrame);
         }
 
         for (ScorePoint scorePoint : scorePoints) {
-            scorePoint.move(gameFrame);
+            moveEntity(scorePoint, gameFrame);
+        }
+
+        if (gameFrame % ConstValues.NUMBER_OF_FRAMES_TO_INCREMENT == 0) {
+            currentObstacleSpeed--;
         }
     }
 
     private void moveEntity(Movable entity, long gameFrame) {
         entity.move(gameFrame);
+        entity.speedUp(gameFrame);
     }
 
     private void detectCollisions() {
@@ -197,12 +208,11 @@ public class GameScreen implements Screen {
             CollisionType type = intersects(player, obstacle);
             if (type != CollisionType.NONE) {
                 boolean collisionFlag = true;
-                try {
+                if (obstacle.getObstacleType() == ObstacleType.RAIL) {
                     Rail rail = (Rail) obstacle;
                     collisionFlag = getOffRail(rail);
-                } catch (Exception e) {
-//                    e.printStackTrace();
                 }
+
                 if (collisionFlag) player.collide(obstacle);
             }
         }
@@ -263,7 +273,14 @@ public class GameScreen implements Screen {
     }
 
     private void generateObstacle() {
-        if (gameFrame % obstacleSpawnRate == 0) {
+        obstacleFrame++;
+        if (obstacleFrame % ConstValues.NUMBER_OF_FRAMES_TO_INCREMENT == 0) {
+            obstacleSpawnRate = obstacleSpawnRate - obstacleSpawnRate / -currentObstacleSpeed;
+            obstacleFrame = 1;
+//            java.lang.System.out.println("Spawn rate " + obstacleSpawnRate + " speed " + -currentObstacleSpeed);
+        }
+
+        if (obstacleFrame % obstacleSpawnRate == 0) {
             Random random = new Random();
             int x = random.nextInt(1000);
 
@@ -281,25 +298,25 @@ public class GameScreen implements Screen {
     }
 
     private void createGrid() {
-        Grid grid = new Grid(new Position(V_WIDTH, 60), -3);
+        Grid grid = new Grid(new Position(V_WIDTH, 60), currentObstacleSpeed);
 //        grids.add(grid);
-        GridStick gridStick = new GridStick(new Position(V_WIDTH, 60), -3);
+        GridStick gridStick = new GridStick(new Position(V_WIDTH, 60), currentObstacleSpeed);
         obstacles.add(grid);
         obstacles.add(gridStick);
     }
 
     private void createRail() {
-        Rail rail = new Rail(new Position(V_WIDTH, 110), -3);
+        Rail rail = new Rail(new Position(V_WIDTH, 110), currentObstacleSpeed);
         obstacles.add(rail);
     }
 
     private void createBox() {
-        Box box = new Box(new Position(V_WIDTH, 100), -3);
+        Box box = new Box(new Position(V_WIDTH, 100), currentObstacleSpeed);
         obstacles.add(box);
     }
 
     private void createScorePoint(int extra) {
-        ScorePoint scorePoint = new ScorePoint(new Position(V_WIDTH + extra, 0), -3);
+        ScorePoint scorePoint = new ScorePoint(new Position(V_WIDTH + extra, 0), currentObstacleSpeed);
         scorePoints.add(scorePoint);
     }
 

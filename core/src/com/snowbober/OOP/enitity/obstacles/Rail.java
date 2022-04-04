@@ -17,6 +17,10 @@ public class Rail extends Obstacle {
         collisionInfo = new CollisionInfo(ConstValues.RAIL_WIDTH - 35, ConstValues.RAIL_HEIGHT);
     }
 
+    public void setRailCollisionHeight(int height) {
+        collisionInfo = new CollisionInfo(ConstValues.RAIL_WIDTH - 35, height);
+    }
+
     @Override
     public void collide(Collidable object) {
 

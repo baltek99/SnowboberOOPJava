@@ -26,4 +26,11 @@ public class Background extends EntityWithTexture implements Movable {
     public void move(long gameFrame) {
         this.position.setX(this.position.getX() + speed);
     }
+
+    @Override
+    public void speedUp(long gameFrame) {
+        if (gameFrame % ConstValues.NUMBER_OF_FRAMES_TO_INCREMENT == 0) {
+            speed--;
+        }
+    }
 }

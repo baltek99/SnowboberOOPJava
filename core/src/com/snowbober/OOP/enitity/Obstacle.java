@@ -1,5 +1,6 @@
 package com.snowbober.OOP.enitity;
 
+import com.snowbober.OOP.ConstValues;
 import com.snowbober.OOP.Position;
 import com.snowbober.OOP.Visual;
 import com.snowbober.OOP.enums.ObstacleType;
@@ -21,6 +22,17 @@ public abstract class Obstacle extends EntityWithTexture implements Movable, Col
 
     public CollisionInfo getCollisionInfo() {
         return collisionInfo;
+    }
+
+    public ObstacleType getObstacleType() {
+        return obstacleType;
+    }
+
+    @Override
+    public void speedUp(long gameFrame) {
+        if (gameFrame % ConstValues.NUMBER_OF_FRAMES_TO_INCREMENT == 0) {
+            speed--;
+        }
     }
 
     @Override
