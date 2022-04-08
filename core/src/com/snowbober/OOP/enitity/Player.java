@@ -19,6 +19,7 @@ import java.util.Queue;
 public class Player extends EntityWithTexture implements PlayerActions, Movable, Collidable {
 
     private int score;
+    private String name;
     private Queue<Life> lives;
     private boolean immortal = false;
     private PlayerState playerState;
@@ -38,8 +39,9 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
         return collisionInfo;
     }
 
-    public Player(Position position, Visual visual) {
+    public Player(Position position, Visual visual, String name) {
         super(position, visual);
+        this.name = name;
         this.zIndex = 0;
         this.score = 0;
         this.lives = new LinkedList<>();
@@ -76,6 +78,14 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
 
     public int getScore() {
         return score;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void moveRight() {

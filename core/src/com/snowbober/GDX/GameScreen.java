@@ -20,11 +20,10 @@ import com.snowbober.OOP.enums.GameState;
 import com.snowbober.OOP.enums.ObstacleType;
 import com.snowbober.OOP.enums.PlayerState;
 import com.snowbober.OOP.interfaces.Movable;
-import com.sun.org.apache.bcel.internal.Const;
 
 import java.util.*;
 
-public class GameScreen implements Screen {
+public class GameScreen implements Screen, Input.TextInputListener {
 
     public static final int V_WIDTH = ConstValues.V_WIDTH;
     public static final int V_HEIGHT = ConstValues.V_HEIGHT;
@@ -45,6 +44,8 @@ public class GameScreen implements Screen {
     private int obstacleFrame;
     private int obstacleSpawnRate;
     private int currentObstacleSpeed;
+    private String playerName;
+    private int result;
 
     public GameScreen() {
         this.batch = new SpriteBatch();
@@ -79,7 +80,7 @@ public class GameScreen implements Screen {
         backgrounds.add(background);
     }
 
-    private void createGameWorld() {
+    private void createGameWorld(String playerName) {
         resetWorld();
         Texture backgroundTexture = new Texture("background.jpg");
         Texture playerTexture = new Texture("bober-stand.png");
@@ -88,11 +89,12 @@ public class GameScreen implements Screen {
         backgrounds.add(background1);
         backgrounds.add(background2);
         player = new Player(new Position(ConstValues.BOBER_DEFAULT_POSITION_X, ConstValues.BOBER_DEFAULT_POSITION_Y),
-                new Visual(playerTexture, ConstValues.BOBER_DEFAULT_WIDTH, ConstValues.BOBER_DEFAULT_HEIGHT));
+                new Visual(playerTexture, ConstValues.BOBER_DEFAULT_WIDTH, ConstValues.BOBER_DEFAULT_HEIGHT), playerName);
     }
 
     private void createGameOver(int score) {
         resetWorld();
+        result = score;
         Texture backgroundTexture = new Texture("game-over.jpg");
         Background background = new Background(new Position(0, 0), new Visual(backgroundTexture, SnowBoberGame.V_WIDTH, SnowBoberGame.V_HEIGHT), 0);
         backgrounds.add(background);
@@ -125,18 +127,20 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         if (gameState == GameState.MAIN_MENU) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
-                gameState = GameState.GAMEPLAY;
-                createGameWorld();
+                Gdx.input.getTextInput(this, "Podaj swój nick", "", "Player");
             }
+            if (playerName != null) {
+                gameState = GameState.GAMEPLAY;
+                createGameWorld(playerName);
+            }
+            drawStart();
         } else if (gameState == GameState.GAMEPLAY) {
             detectInput(gameFrame);
             move(gameFrame);
 
             generateObstacle();
 
-            if (!player.isImmortal()) {
-                detectCollisions();
-            }
+            detectCollisions();
 
             clearObstacles();
 
@@ -144,20 +148,52 @@ public class GameScreen implements Screen {
                 gameState = GameState.GAME_OVER;
                 createGameOver(player.getScore());
             }
+            drawGame();
         } else if (gameState == GameState.GAME_OVER) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
+                playerName = null;
                 gameState = GameState.MAIN_MENU;
                 createStart();
             }
+            drawEnd();
         }
 
-        draw();
+
         gameFrame++;
     }
 
-    private void draw() {
+    private void drawStart() {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        batch.begin();
+
+        for (Background background : backgrounds) {
+            background.render(batch);
+        }
+        batch.end();
+    }
+
+    private void drawEnd() {
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        batch.begin();
+
+        for (Background background : backgrounds) {
+            background.render(batch);
+        }
+
+        font.setColor(Color.WHITE);
+        font.draw(batch, "Player: " + playerName + "    Score: " + result, 200, 50);
+
+        batch.end();
+    }
+
+    private void drawGame() {
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        font.setColor(Color.BLACK);
 
         batch.begin();
 
@@ -207,6 +243,7 @@ public class GameScreen implements Screen {
         }
 
         if (gameFrame % ConstValues.NUMBER_OF_FRAMES_TO_INCREMENT == 0) {
+
             currentObstacleSpeed--;
         }
     }
@@ -217,16 +254,18 @@ public class GameScreen implements Screen {
     }
 
     private void detectCollisions() {
-        for (Obstacle obstacle : obstacles) {
-            CollisionType type = intersects(player, obstacle);
-            if (type != CollisionType.NONE) {
-                boolean collisionFlag = true;
-                if (obstacle.getObstacleType() == ObstacleType.RAIL) {
-                    Rail rail = (Rail) obstacle;
-                    collisionFlag = getOffRail(rail);
-                }
+        if (!player.isImmortal()) {
+            for (Obstacle obstacle : obstacles) {
+                CollisionType type = intersects(player, obstacle);
+                if (type != CollisionType.NONE) {
+                    boolean collisionFlag = true;
+                    if (obstacle.getObstacleType() == ObstacleType.RAIL) {
+                        Rail rail = (Rail) obstacle;
+                        collisionFlag = getOffRail(rail);
+                    }
 
-                if (collisionFlag) player.collide(obstacle);
+                    if (collisionFlag) player.collide(obstacle);
+                }
             }
         }
 
@@ -383,4 +422,13 @@ public class GameScreen implements Screen {
 
     }
 
+    @Override
+    public void input(String text) {
+        playerName = text;
+    }
+
+    @Override
+    public void canceled() {
+
+    }
 }
