@@ -203,7 +203,8 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
         if (obstacle.obstacleType == ObstacleType.SCORE_POINT) {
 //            System.out.println("Punkt");
             score++;
-        } else if (obstacle.obstacleType == ObstacleType.BOX || (obstacle.obstacleType == ObstacleType.RAIL && playerState == PlayerState.IDLE)) {
+        } else if (obstacle.obstacleType == ObstacleType.BOX || (obstacle.obstacleType == ObstacleType.RAIL &&
+                (playerState == PlayerState.IDLE || playerState == PlayerState.CROUCH))) {
             lives.poll();
             immortal = true;
         } else if (obstacle.obstacleType == ObstacleType.RAIL && (playerState == PlayerState.JUMPING ||
