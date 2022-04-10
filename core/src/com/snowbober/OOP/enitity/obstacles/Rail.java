@@ -9,10 +9,13 @@ import com.snowbober.OOP.enitity.Obstacle;
 import com.snowbober.OOP.enums.ObstacleType;
 import com.snowbober.OOP.interfaces.Collidable;
 
+import java.util.Random;
+
 public class Rail extends Obstacle {
 
     public Rail(Position position, int speed) {
-        super(position, new Visual(new Texture("rail.png"), ConstValues.RAIL_WIDTH, ConstValues.RAIL_HEIGHT), speed);
+        super(position, new Visual(new Texture(new Random().nextInt(1000) < 500 ? "rail.png" : "grubas.png"),
+                ConstValues.RAIL_WIDTH, ConstValues.RAIL_HEIGHT), speed);
         obstacleType = ObstacleType.RAIL;
         collisionInfo = new CollisionInfo(ConstValues.RAIL_WIDTH - 35, ConstValues.RAIL_HEIGHT);
     }

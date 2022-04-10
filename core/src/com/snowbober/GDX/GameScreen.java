@@ -98,6 +98,7 @@ public class GameScreen implements Screen, Input.TextInputListener {
         Texture backgroundTexture = new Texture("start.jpg");
         Background background = new Background(new Position(0, 0), new Visual(backgroundTexture, SnowBoberGame.V_WIDTH, SnowBoberGame.V_HEIGHT), 0);
         backgrounds.add(background);
+        playerName = null;
     }
 
     private void createGameWorld(String playerName) {
