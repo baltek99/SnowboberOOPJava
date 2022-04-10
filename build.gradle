@@ -1,5 +1,5 @@
 buildscript {
-    
+
 
     repositories {
         mavenLocal()
@@ -9,13 +9,19 @@ buildscript {
         google()
     }
     dependencies {
-        
+
 
     }
 }
 
 allprojects {
     apply plugin: "eclipse"
+
+    apply plugin: 'java'
+    compileJava {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
 
     version = '1.0'
     ext {
@@ -45,6 +51,7 @@ project(":desktop") {
     dependencies {
         implementation project(":core")
         implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
+        implementation 'com.google.code.gson:gson:2.8.5'
         api "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
@@ -57,6 +64,7 @@ project(":core") {
 
     dependencies {
         implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+        implementation 'com.google.code.gson:gson:2.8.5'
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
 

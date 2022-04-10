@@ -10,7 +10,9 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.google.gson.Gson;
 import com.snowbober.OOP.ConstValues;
+import com.snowbober.OOP.HighScores;
 import com.snowbober.OOP.Position;
 import com.snowbober.OOP.Visual;
 import com.snowbober.OOP.enitity.*;
@@ -21,6 +23,10 @@ import com.snowbober.OOP.enums.ObstacleType;
 import com.snowbober.OOP.enums.PlayerState;
 import com.snowbober.OOP.interfaces.Movable;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class GameScreen implements Screen, Input.TextInputListener {
@@ -39,6 +45,10 @@ public class GameScreen implements Screen, Input.TextInputListener {
     private Queue<Obstacle> obstacles;
     private List<ScorePoint> scorePoints;
     private List<Background> backgrounds;
+
+    private HighScores highScores;
+    private String highScoresPath = "highscores.json";
+    private Gson gson;
 
     private long gameFrame;
     private int obstacleFrame;
@@ -68,12 +78,22 @@ public class GameScreen implements Screen, Input.TextInputListener {
         scorePoints = new LinkedList<>();
         backgrounds = new LinkedList<>();
 
-//        createWorld();
+        highScores = new HighScores();
+        gson = new Gson();
+        try {
+            FileReader fileReader = new FileReader(highScoresPath);
+            highScores = gson.fromJson(fileReader, HighScores.class);
+
+        } catch (FileNotFoundException e) {
+            System.out.println("HighScores file not found!");
+            e.printStackTrace();
+        }
+
         gameState = GameState.MAIN_MENU;
-        createStart();
+        createMainMenuWorld();
     }
 
-    private void createStart() {
+    private void createMainMenuWorld() {
         resetWorld();
         Texture backgroundTexture = new Texture("start.jpg");
         Background background = new Background(new Position(0, 0), new Visual(backgroundTexture, SnowBoberGame.V_WIDTH, SnowBoberGame.V_HEIGHT), 0);
@@ -92,12 +112,28 @@ public class GameScreen implements Screen, Input.TextInputListener {
                 new Visual(playerTexture, ConstValues.BOBER_DEFAULT_WIDTH, ConstValues.BOBER_DEFAULT_HEIGHT), playerName);
     }
 
-    private void createGameOver(int score) {
+    private void createGameOverWorld(int score) {
         resetWorld();
         result = score;
+        highScores.addResult(playerName, result);
+
+        try {
+            FileWriter writer = new FileWriter(highScoresPath);
+            gson.toJson(highScores, writer);
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("HighScores object serialization failed!");
+            e.printStackTrace();
+        }
+
         Texture backgroundTexture = new Texture("game-over.jpg");
         Background background = new Background(new Position(0, 0), new Visual(backgroundTexture, SnowBoberGame.V_WIDTH, SnowBoberGame.V_HEIGHT), 0);
         backgrounds.add(background);
+    }
+
+    private void createHighScoreWorld() {
+        resetWorld();
     }
 
     private void resetWorld() {
@@ -125,7 +161,16 @@ public class GameScreen implements Screen, Input.TextInputListener {
 
     @Override
     public void render(float delta) {
-        if (gameState == GameState.MAIN_MENU) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.H) && (gameState == GameState.MAIN_MENU || gameState == GameState.GAME_OVER)) {
+            gameState = GameState.HIGH_SCORES;
+            drawHighScores();
+        } else if (gameState == GameState.HIGH_SCORES) {
+            drawHighScores();
+            if (Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
+                gameState = GameState.MAIN_MENU;
+                createMainMenuWorld();
+            }
+        } else if (gameState == GameState.MAIN_MENU) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
                 Gdx.input.getTextInput(this, "Podaj swój nick", "", "Player");
             }
@@ -146,20 +191,40 @@ public class GameScreen implements Screen, Input.TextInputListener {
 
             if (player.getLives().size() == 0) {
                 gameState = GameState.GAME_OVER;
-                createGameOver(player.getScore());
+                createGameOverWorld(player.getScore());
             }
             drawGame();
         } else if (gameState == GameState.GAME_OVER) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
-                playerName = null;
-                gameState = GameState.MAIN_MENU;
-                createStart();
+//                playerName = null;
+                gameState = GameState.GAMEPLAY;
+//                createMainMenuWorld();
+                createGameWorld(playerName);
             }
             drawEnd();
         }
 
 
         gameFrame++;
+    }
+
+    private void drawHighScores() {
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        batch.begin();
+
+        font.setColor(Color.WHITE);
+
+        int size = highScores.getScores().size();
+        int inc = V_HEIGHT / size;
+
+        for (int i = size - 1; i >= 0; i--) {
+            font.draw(batch, size - i + ". " + highScores.getScores().get(i),
+                    300, (i + 1) * inc - 25);
+        }
+
+        batch.end();
     }
 
     private void drawStart() {
