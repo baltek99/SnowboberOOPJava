@@ -12,8 +12,7 @@ import com.snowbober.OOP.interfaces.Collidable;
 public class ScorePoint extends Obstacle {
 
     public ScorePoint(Position position, int speed) {
-        super(position, new Visual(new Texture("rail.png"), ConstValues.SCORE_WIDTH, ConstValues.SCORE_HEIGHT), speed);
-        obstacleType = ObstacleType.SCORE_POINT;
+        super(position, new Visual(new Texture("rail.png"), ConstValues.SCORE_WIDTH, ConstValues.SCORE_HEIGHT), speed, ObstacleType.SCORE_POINT);
         collisionInfo = new CollisionInfo(1, ConstValues.SCORE_HEIGHT);
     }
 

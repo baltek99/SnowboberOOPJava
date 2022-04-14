@@ -11,9 +11,8 @@ import com.snowbober.OOP.interfaces.Collidable;
 
 public class Grid extends Obstacle {
     public Grid(Position position, int speed) {
-        super(position, new Visual(new Texture("grid.png"), ConstValues.GRID_WIDTH, ConstValues.GRID_HEIGHT), speed);
+        super(position, new Visual(new Texture("grid.png"), ConstValues.GRID_WIDTH, ConstValues.GRID_HEIGHT), speed, ObstacleType.GRID);
         this.zIndex = 1;
-        obstacleType = ObstacleType.GRID;
         collisionInfo = new CollisionInfo(168, 350);
     }
 

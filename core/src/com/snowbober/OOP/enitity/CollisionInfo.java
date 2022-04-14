@@ -3,7 +3,6 @@ package com.snowbober.OOP.enitity;
 import com.badlogic.gdx.math.Rectangle;
 import com.snowbober.OOP.enums.CollisionType;
 
-
 public class CollisionInfo {
     public Rectangle rectangle;
     public CollisionType collisionType;
