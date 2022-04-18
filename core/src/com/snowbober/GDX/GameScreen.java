@@ -218,11 +218,13 @@ public class GameScreen implements Screen, Input.TextInputListener {
         font.setColor(Color.WHITE);
 
         int size = highScores.getScores().size();
-        int inc = V_HEIGHT / size;
+        if (size != 0) {
+            int inc = V_HEIGHT / size;
 
-        for (int i = size - 1; i >= 0; i--) {
-            font.draw(batch, size - i + ". " + highScores.getScores().get(i),
-                    300, (i + 1) * inc - 25);
+            for (int i = size - 1; i >= 0; i--) {
+                font.draw(batch, size - i + ". " + highScores.getScores().get(i),
+                        300, (i + 1) * inc - 25);
+            }
         }
 
         batch.end();
