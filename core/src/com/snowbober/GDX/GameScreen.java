@@ -199,7 +199,6 @@ public class GameScreen implements Screen, Input.TextInputListener {
             if (Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
 //                playerName = null;
                 gameState = GameState.GAMEPLAY;
-//                createMainMenuWorld();
                 createGameWorld(playerName);
             }
             drawEnd();

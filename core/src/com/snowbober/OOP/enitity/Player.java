@@ -35,10 +35,6 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
     private int immortalDuration = 150;
     private int speedCount = 5;
 
-    public CollisionInfo getCollisionInfo() {
-        return collisionInfo;
-    }
-
     public Player(Position position, Visual visual, String name) {
         super(position, visual);
         this.name = name;
@@ -86,6 +82,10 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public CollisionInfo getCollisionInfo() {
+        return collisionInfo;
     }
 
     public void moveRight() {
@@ -214,7 +214,6 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
             Texture texture = new Texture("bober-rail.png");
             this.setVisual(new Visual(texture, ConstValues.BOBER_ON_RAIL_WIDTH, ConstValues.BOBER_ON_RAIL_HEIGHT));
             ((Rail) obstacle).setRailCollisionHeight(1);
-//            System.out.println("rail");
         } else if (obstacle.obstacleType == ObstacleType.GRID && playerState != PlayerState.CROUCH) {
             lives.poll();
             immortal = true;
