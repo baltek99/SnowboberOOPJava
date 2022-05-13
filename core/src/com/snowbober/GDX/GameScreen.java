@@ -3,6 +3,7 @@ package com.snowbober.GDX;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -22,6 +23,7 @@ import com.snowbober.OOP.enums.GameState;
 import com.snowbober.OOP.enums.ObstacleType;
 import com.snowbober.OOP.enums.PlayerState;
 import com.snowbober.OOP.interfaces.Movable;
+import com.snowbober.Util.RotatedRectangle;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -50,6 +52,8 @@ public class GameScreen implements Screen, Input.TextInputListener {
     private String highScoresPath = "highscores.json";
     private Gson gson;
 
+    private Music gameplayMusic;
+
     private long gameFrame;
     private int obstacleFrame;
     private int obstacleSpawnRate;
@@ -73,6 +77,10 @@ public class GameScreen implements Screen, Input.TextInputListener {
         obstacleFrame = 0;
         obstacleSpawnRate = 300;
         currentObstacleSpeed = -3;
+
+        gameplayMusic = Gdx.audio.newMusic(Gdx.files.internal("boberMusic.wav"));
+        gameplayMusic.setLooping(true);
+        gameplayMusic.setVolume(0.5f);
 
         obstacles = new LinkedList<>();
         scorePoints = new LinkedList<>();
@@ -111,6 +119,7 @@ public class GameScreen implements Screen, Input.TextInputListener {
         backgrounds.add(background2);
         player = new Player(new Position(ConstValues.BOBER_DEFAULT_POSITION_X, ConstValues.BOBER_DEFAULT_POSITION_Y),
                 new Visual(playerTexture, ConstValues.BOBER_DEFAULT_WIDTH, ConstValues.BOBER_DEFAULT_HEIGHT), playerName);
+        gameplayMusic.play();
     }
 
     private void createGameOverWorld(int score) {
@@ -192,6 +201,7 @@ public class GameScreen implements Screen, Input.TextInputListener {
 
             if (player.getLives().size() == 0) {
                 gameState = GameState.GAME_OVER;
+                gameplayMusic.stop();
                 createGameOverWorld(player.getScore());
             }
             drawGame();
@@ -203,8 +213,6 @@ public class GameScreen implements Screen, Input.TextInputListener {
             }
             drawEnd();
         }
-
-
         gameFrame++;
     }
 
@@ -356,10 +364,10 @@ public class GameScreen implements Screen, Input.TextInputListener {
         obstacleInfo.rectangle.x = obstacle.getPosition().getX();
         obstacleInfo.rectangle.y = obstacle.getPosition().getY();
 
-        if (touch(playerInfo.rectangle, obstacleInfo.rectangle)) {
-            return CollisionType.TOUCH;
-        }
-        if (playerInfo.rectangle.overlaps(obstacleInfo.rectangle)) {
+        RotatedRectangle playerRect = new RotatedRectangle(playerInfo.rectangle, player.getVisual().getRotation());
+        RotatedRectangle obstacleRect = new RotatedRectangle(obstacleInfo.rectangle, obstacle.getVisual().getRotation());
+
+        if (playerRect.intersects(obstacleRect)) {
             return CollisionType.INTERSECT;
         }
 
@@ -396,7 +404,6 @@ public class GameScreen implements Screen, Input.TextInputListener {
         if (obstacleFrame % ConstValues.NUMBER_OF_FRAMES_TO_INCREMENT == 0) {
             obstacleSpawnRate = obstacleSpawnRate - obstacleSpawnRate / -currentObstacleSpeed;
             obstacleFrame = 1;
-//            java.lang.System.out.println("Spawn rate " + obstacleSpawnRate + " speed " + -currentObstacleSpeed);
         }
 
         if (obstacleFrame % obstacleSpawnRate == 0) {
@@ -481,7 +488,7 @@ public class GameScreen implements Screen, Input.TextInputListener {
 
     @Override
     public void dispose() {
-
+        gameplayMusic.dispose();
     }
 
     @Override
