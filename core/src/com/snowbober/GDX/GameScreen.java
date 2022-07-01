@@ -171,7 +171,8 @@ public class GameScreen implements Screen, Input.TextInputListener {
 
     @Override
     public void render(float delta) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.H) && (gameState == GameState.MAIN_MENU || gameState == GameState.GAME_OVER)) {
+        if ((Gdx.input.isKeyJustPressed(Input.Keys.H) || Gdx.input.isKeyJustPressed(Input.Keys.TAB))
+                && (gameState == GameState.MAIN_MENU || gameState == GameState.GAME_OVER)) {
             gameState = GameState.HIGH_SCORES;
             drawHighScores();
         } else if (gameState == GameState.HIGH_SCORES) {
@@ -190,6 +191,12 @@ public class GameScreen implements Screen, Input.TextInputListener {
             }
             drawStart();
         } else if (gameState == GameState.GAMEPLAY) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+                gameplayMusic.pause();
+                gameState = GameState.PAUSE;
+                return;
+            }
+
             detectInput(gameFrame);
             move(gameFrame);
 
@@ -207,11 +214,20 @@ public class GameScreen implements Screen, Input.TextInputListener {
             drawGame();
         } else if (gameState == GameState.GAME_OVER) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
-//                playerName = null;
                 gameState = GameState.GAMEPLAY;
                 createGameWorld(playerName);
             }
             drawEnd();
+        } else if (gameState == GameState.PAUSE) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+                gameplayMusic.play();
+                gameState = GameState.GAMEPLAY;
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+                gameplayMusic.stop();
+                createMainMenuWorld();
+                gameState = GameState.MAIN_MENU;
+            }
         }
         gameFrame++;
     }
