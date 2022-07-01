@@ -144,6 +144,9 @@ public class GameScreen implements Screen, Input.TextInputListener {
 
     private void createHighScoreWorld() {
         resetWorld();
+        Texture backgroundTexture = new Texture("high-scores.jpg");
+        Background background = new Background(new Position(0, 0), new Visual(backgroundTexture, SnowBoberGame.V_WIDTH, SnowBoberGame.V_HEIGHT), 0);
+        backgrounds.add(background);
     }
 
     private void resetWorld() {
@@ -174,6 +177,7 @@ public class GameScreen implements Screen, Input.TextInputListener {
         if ((Gdx.input.isKeyJustPressed(Input.Keys.H) || Gdx.input.isKeyJustPressed(Input.Keys.TAB))
                 && (gameState == GameState.MAIN_MENU || gameState == GameState.GAME_OVER)) {
             gameState = GameState.HIGH_SCORES;
+            createHighScoreWorld();
             drawHighScores();
         } else if (gameState == GameState.HIGH_SCORES) {
             drawHighScores();
@@ -238,7 +242,11 @@ public class GameScreen implements Screen, Input.TextInputListener {
 
         batch.begin();
 
-        font.setColor(Color.WHITE);
+        for (Background background : backgrounds) {
+            background.render(batch);
+        }
+
+        font.setColor(Color.BLACK);
 
         int size = highScores.getScores().size();
         if (size != 0) {
