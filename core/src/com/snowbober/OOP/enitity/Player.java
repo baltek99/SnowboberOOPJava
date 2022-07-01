@@ -182,15 +182,12 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
             jumpDuration = 80;
             flipRotationSpeed = 4.5f;
         } else if (gameFrame == 3 * ConstValues.NUMBER_OF_FRAMES_TO_INCREMENT) {
-//            jumpHeight = 110;
             jumpDuration = 65;
             flipRotationSpeed = 5.5f;
         } else if (gameFrame == 6 * ConstValues.NUMBER_OF_FRAMES_TO_INCREMENT) {
-//            jumpHeight = 110;
             jumpDuration = 55;
             flipRotationSpeed = 6f;
         } else if (gameFrame == 8 * ConstValues.NUMBER_OF_FRAMES_TO_INCREMENT) {
-//            jumpHeight = 110;
             jumpDuration = jumpDuration - jumpDuration / speedCount;
             flipRotationSpeed = flipRotationSpeed + flipRotationSpeed / speedCount;
             speedCount++;
@@ -201,7 +198,6 @@ public class Player extends EntityWithTexture implements PlayerActions, Movable,
     public void collide(Collidable collidable) {
         Obstacle obstacle = (Obstacle) collidable;
         if (obstacle.obstacleType == ObstacleType.SCORE_POINT) {
-//            System.out.println("Punkt");
             score++;
         } else if (obstacle.obstacleType == ObstacleType.BOX || (obstacle.obstacleType == ObstacleType.RAIL &&
                 (playerState == PlayerState.IDLE || playerState == PlayerState.CROUCH))) {

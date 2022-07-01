@@ -1,6 +1,7 @@
 package com.snowbober.OOP.enitity.obstacles;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.snowbober.OOP.ConstValues;
 import com.snowbober.OOP.Position;
 import com.snowbober.OOP.Visual;
@@ -16,6 +17,7 @@ public class Box extends Obstacle {
 
     @Override
     public void collide(Collidable object) {
-
+        Visual visual = getVisual();
+        visual.setTexture(new TextureRegion(new Texture("box-broken.png")));
     }
 }

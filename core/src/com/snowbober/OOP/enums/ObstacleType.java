@@ -1,5 +1,5 @@
 package com.snowbober.OOP.enums;
 
 public enum ObstacleType {
-    BOX, RAIL, PLAYER, SCORE_POINT, GRID
+    BOX, RAIL, PLAYER, SCORE_POINT, GRID, GRID_STICK
 }
