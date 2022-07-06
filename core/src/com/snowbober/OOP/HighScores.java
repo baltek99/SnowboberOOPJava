@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class HighScores implements Serializable {
-
     private final List<ResultBind> scores;
     private final int maxNumberOfResults;
 

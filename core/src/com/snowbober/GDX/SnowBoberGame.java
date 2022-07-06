@@ -3,7 +3,6 @@ package com.snowbober.GDX;
 import com.badlogic.gdx.Game;
 
 public class SnowBoberGame extends Game {
-
     private GameScreen gameScreen;
     public static final int V_WIDTH = 964;
     public static final int V_HEIGHT = 540;

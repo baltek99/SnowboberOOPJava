@@ -6,7 +6,6 @@ import com.snowbober.OOP.Visual;
 import com.snowbober.OOP.interfaces.Movable;
 
 public class Background extends EntityWithTexture implements Movable {
-
     protected int speed;
 
     public Background(Position position, Visual visual, int speed) {

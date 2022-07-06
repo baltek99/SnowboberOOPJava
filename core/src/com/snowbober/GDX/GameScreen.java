@@ -49,10 +49,10 @@ public class GameScreen implements Screen, Input.TextInputListener {
     private List<Background> backgrounds;
 
     private HighScores highScores;
-    private String highScoresPath = "highscores.json";
-    private Gson gson;
+    private final String highScoresPath = "highscores.json";
+    private final Gson gson;
 
-    private Music gameplayMusic;
+    private final Music gameplayMusic;
 
     private long gameFrame;
     private int obstacleFrame;
@@ -251,7 +251,6 @@ public class GameScreen implements Screen, Input.TextInputListener {
         int size = highScores.getScores().size();
         if (size != 0) {
             int inc = V_HEIGHT / size;
-
             for (int i = size - 1; i >= 0; i--) {
                 font.draw(batch, size - i + ". " + highScores.getScores().get(i),
                         300, (i + 1) * inc - 25);
@@ -342,7 +341,6 @@ public class GameScreen implements Screen, Input.TextInputListener {
         }
 
         if (gameFrame % ConstValues.NUMBER_OF_FRAMES_TO_INCREMENT == 0) {
-
             currentObstacleSpeed--;
         }
     }
@@ -381,7 +379,6 @@ public class GameScreen implements Screen, Input.TextInputListener {
     }
 
     private CollisionType intersects(Player player, Obstacle obstacle) {
-
         CollisionInfo playerInfo = player.getCollisionInfo();
         CollisionInfo obstacleInfo = obstacle.getCollisionInfo();
 

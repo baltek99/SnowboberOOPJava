@@ -10,7 +10,6 @@ import com.snowbober.OOP.enums.ObstacleType;
 import com.snowbober.OOP.interfaces.Collidable;
 
 public class Box extends Obstacle {
-
     public Box(Position position, int speed) {
         super(position, new Visual(new Texture("box.png"), ConstValues.BOX_WIDTH, ConstValues.BOX_HEIGHT), speed, ObstacleType.BOX);
     }

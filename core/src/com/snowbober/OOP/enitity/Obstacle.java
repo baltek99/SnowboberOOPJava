@@ -8,7 +8,6 @@ import com.snowbober.OOP.interfaces.Collidable;
 import com.snowbober.OOP.interfaces.Movable;
 
 public abstract class Obstacle extends EntityWithTexture implements Movable, Collidable {
-
     protected CollisionInfo collisionInfo;
     protected ObstacleType obstacleType;
     protected int speed;

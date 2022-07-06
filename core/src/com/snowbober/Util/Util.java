@@ -1,7 +1,6 @@
 package com.snowbober.Util;
 
 public class Util {
-
     /**
      * Linearly interpolates a value between two floats
      *

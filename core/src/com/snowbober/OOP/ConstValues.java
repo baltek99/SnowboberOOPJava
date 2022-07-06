@@ -16,7 +16,6 @@ public class ConstValues {
 
     public static final int NUMBER_OF_FRAMES_TO_INCREMENT = 1000;
 
-    // TEXTURES REGION
     public static final int BOBER_DEFAULT_WIDTH = 180;
     public static final int BOBER_DEFAULT_HEIGHT = 215;
     public static final int BOBER_ON_RAIL_WIDTH = 180;
